@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Calculator</title>
+  <style>
+      #display {
+          border:solid;
+          height:100px;
+          width: 300px;
+          font-size: xx-large;
+      }
+      button  {
+        background-color: #d0c5b9;
+        border:solid gray;
+        margin: 10px 0px 0px 0px;
+        height: 35px;
+        font: inherit;
+      }
+      button:hover {
+        background-color: #cfe0d5;
+      }
+      </style>
+</head>
+<body>
+  <div id='display'></div>
+  <div id='numbersContainer'>
+    <button>0</button>
+    <button>9</button>
+    <button>8</button>
+    <button>7</button>
+    <button>6</button>
+    <button>5</button>
+    <button>4</button>
+    <button>3</button>
+    <button>2</button>
+    <button>1</button>
+  </div>
+  <button  id='plus'>Plus</button>
+  <button  id='minus'>Minus</button>
+  <button  id='times'>Times</button>
+  <button  id='divide'>Divide</button>
+  <button  id='equals'>Equals</button>
+  <button  id='clear'>Clear</button>
+  <button  id='backspace'>Backspace</button>
+  <script>
+  let numbersContainer = document.getElementById('numbersContainer');
+  let result = 0;
+  let input = null;
+  let fork = 'result';
+  let display = document.getElementById('display');
+  updateDisplay();
+  let add = (a,b) => a + b;
+  let subtract = (a,b) => a - b;
+  let multiply = (a,b) => a * b;
+  let divide = (a,b) => a / b;
+  let lastInput;
+  let currentOp;
+  function chooseOp(operator) {
+    if (input !== null) equals();
+    fork = 'input';
+    currentOp = operator;
+  }
+
+  function equals() {
+    if ((input === null && !lastInput) || (((input === 0) || (input === 0)) && (currentOp === divide))) {
+      return display.textContent = 'Error';
+    } else if (input === null && lastInput) {
+      result = currentOp(result, lastInput);
+    } else {
+      result = currentOp(result, input);
+      lastInput = input;
+      input = null;
+    };
+    if ((result > 1e12) || (result < -1e12)) {
+      result < 0 ? display.textContent = 'Too small' : display.textContent = 'Too large'
+      return result = 0;
+    }
+    fork = 'result'
+    updateDisplay();
+    return result;
+  }
+  
+
+  function updateDisplay() {
+    fork === 'result' ? number = result : number = input;
+    if (!Number.isInteger(number)) number = Math.round((number*100000))/100000;
+    display.textContent = number;
+  }
+  function write(nbr) {
+    if (fork === 'result') {
+      if ((result > 1e10) || (result < -1e10)) return result < 0 ? display.textContent = 'Too small' : display.textContent = 'Too large';
+      result = result * 10 + nbr;
+    } else {
+      if ((input > 1e10) || (input < -1e10)) return input < 0 ? display.textContent = 'Too small.' : display.textContent = 'Too large.';
+      input = input * 10 + nbr;
+    }
+    updateDisplay();
+  }
+  function autoBackspace() {
+    function backspace(nbr) {
+      let tenth = nbr / 10;
+      return tenth >= tenth.toFixed() ? +(tenth.toFixed()) : +(tenth.toFixed() - 1);
+    }
+    if (fork === 'result') {
+      result = backspace(result);
+    } else {
+      input = backspace(input);
+    }
+    updateDisplay();
+  }
+  function clear() {
+    fork = 'result';
+    result = 0;
+    input = null;
+    lastInput = input;
+    updateDisplay();
+  }
+  for (let i = 1; i < 10; i++) {
+  numbersContainer.children[i].addEventListener('click', () => {write(10 - i)})
+  }
+
+  numbersContainer.children[0].addEventListener('click', () => {write(0)});
+  document.getElementById('plus').addEventListener('click', () => {chooseOp(add)});
+  document.getElementById('minus').addEventListener('click', () => {chooseOp(subtract)});
+  document.getElementById('times').addEventListener('click', () => {chooseOp(multiply)});
+  document.getElementById('divide').addEventListener('click', () => {chooseOp(divide)});
+  document.getElementById('equals').addEventListener('click', () => {equals()});
+  document.getElementById('clear').addEventListener('click', () => {clear()});
+  document.getElementById('backspace').addEventListener('click', () => {autoBackspace()});
+    function test() {
+      write(5);
+      chooseOp(add);
+      write(2);
+      chooseOp(divide);
+      write(3);
+      chooseOp(add);
+      write(1);
+      equals();
+      equals();
+      equals();
+      chooseOp(multiply);
+      write(3);
+      equals();
+      return result;
+    }
+    function test2() {
+      write(5);
+      write(1);
+      chooseOp(subtract);
+      write(4);
+      write(2);
+      autoBackspace();
+      write(0);
+      console.log(equals());
+      chooseOp(multiply);
+      write(1);
+      write(0);
+      autoBackspace();
+      write(0);
+      chooseOp(multiply);
+      write(2);
+      console.log(equals());
+    }
+    function test3(nbr) {
+      write(5);
+      chooseOp(add);
+      write(3);
+      autoBackspace();
+      write(1);
+      write(2);
+      write(1);
+      autoBackspace();
+      autoBackspace();
+      autoBackspace();
+      chooseOp(add)
+      write(1);
+      console.log(equals());
+    }
+  </script>
+  </body>
+</html>
