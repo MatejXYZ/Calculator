@@ -80,33 +80,33 @@
     updateDisplay();
     return result;
   }
-  
-
   function updateDisplay() {
     fork === 'result' ? number = result : number = input;
     if (!Number.isInteger(number)) number = Math.round((number*100000))/100000;
     display.textContent = number;
   }
+  let float;
+  function writeDot() {
+    float = 1;
+  }
   function write(nbr) {
-    if (fork === 'result') {
-      if ((result > 1e10) || (result < -1e10)) return result < 0 ? display.textContent = 'Too small' : display.textContent = 'Too large';
-      result = result * 10 + nbr;
-    } else {
-      if ((input > 1e10) || (input < -1e10)) return input < 0 ? display.textContent = 'Too small.' : display.textContent = 'Too large.';
-      input = input * 10 + nbr;
+    function writeInto(target) {
+      if (target === null) target = 0;
+      if ((target > 1e10) || (target < -1e10)) return target < 0 ? display.textContent = 'Too small' : display.textContent = 'Too large';
+      return Number(target.toString() + nbr);
     }
-    updateDisplay();
+    function writeAfterDot(target) {
+      return Number(target.toString() + '.' + nbr);
+    }
+    if (float) {
+      fork === 'result' ? result = writeAfterDot(result) : input = writeAfterDot(input);
+      float = 0;
+    } else fork === 'result' ? result = writeInto(result) : input = writeInto(input);
+    return updateDisplay();
   }
   function autoBackspace() {
-    function backspace(nbr) {
-      let tenth = nbr / 10;
-      return tenth >= tenth.toFixed() ? +(tenth.toFixed()) : +(tenth.toFixed() - 1);
-    }
-    if (fork === 'result') {
-      result = backspace(result);
-    } else {
-      input = backspace(input);
-    }
+    backspace = number => number = Number(number.toString().slice(0, number.toString().length - 1));
+    fork === 'result' ? result = backspace(Number(result)) : input = backspace(Number(input));
     updateDisplay();
   }
   function clear() {
