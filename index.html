@@ -1,182 +1,150 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8">
-  <title>Calculator</title>
+  <title>Calculator2</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
   <style>
-      #display {
-          border:solid;
-          height:100px;
-          width: 300px;
-          font-size: xx-large;
-      }
-      button  {
-        background-color: #d0c5b9;
-        border:solid gray;
-        margin: 10px 0px 0px 0px;
-        height: 35px;
-        font: inherit;
-      }
-      button:hover {
-        background-color: #cfe0d5;
-      }
-      </style>
+    body {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      font-family: 'Roboto', sans-serif;
+      color: #321;
+    }
+
+    #display {
+      border: solid #246;
+      height: 75px;
+      width: 300px;
+      padding: 5px;
+      font-size: xx-large;
+    }
+    button {
+      font-size: x-large;
+    }
+  </style>
 </head>
+
 <body>
   <div id='display'></div>
-  <div id='numbersContainer'>
-    <button>0</button>
-    <button>9</button>
-    <button>8</button>
-    <button>7</button>
-    <button>6</button>
-    <button>5</button>
-    <button>4</button>
-    <button>3</button>
-    <button>2</button>
-    <button>1</button>
-  </div>
-  <button  id='plus'>Plus</button>
-  <button  id='minus'>Minus</button>
-  <button  id='times'>Times</button>
-  <button  id='divide'>Divide</button>
-  <button  id='equals'>Equals</button>
-  <button  id='clear'>Clear</button>
-  <button  id='backspace'>Backspace</button>
+  <!--
+  <button>0</button>
+  <button>1</button>
+  <button>2</button>
+  <button>3</button>
+  <button>4</button>
+  <button>.</button>
+  <button>+</button>
+  <button>-</button>
+  <button>*</button>
+  <button>/</button>
+  <button>Backspace</button>
+  -->
   <script>
-  let numbersContainer = document.getElementById('numbersContainer');
-  let result = 0;
-  let input = null;
-  let fork = 'result';
-  let display = document.getElementById('display');
-  updateDisplay();
-  let add = (a,b) => a + b;
-  let subtract = (a,b) => a - b;
-  let multiply = (a,b) => a * b;
-  let divide = (a,b) => a / b;
-  let lastInput;
-  let currentOp;
-  function chooseOp(operator) {
-    if (input !== null) equals();
-    fork = 'input';
-    currentOp = operator;
-  }
+    const beginningValues = ['0', 'is', '0', 0, {operation:'multiply', value:'begin'}, 1];
+    let [currentValue, currentOperation, lastValue, pending, lastExecution, isResult] = beginningValues;
+    const display = document.getElementById('display');
+    function update() {
+      display.textContent = currentValue;
+      console.log(lastValue)
+    }
+    const operations = {
+      is: (a,b) => a,
+      add: (a,b) => +a + +b,
+      subtract: (a,b) => a - b,
+      multiply: (a,b) => a * b,
+      divide: function(a,b) {
+        if (!+b) {
+         display.textContent = 'Error';
+         return 0; 
+        }
+        return a / b;
+      }
+    }
+    const bf = {
+      write: function(char) {
+        if (char === '.') {
+          if (currentValue.lastIndexOf('.') !== -1) return;
+          if (!pending && !isResult) return;
+          else if (currentValue === '0') return currentValue = '0.'
+        }
+        if (currentValue === '0') return currentValue = '' + char;
+        if (pending || isResult) {
+          currentValue = currentValue + char
+        } else {
+          lastValue = currentValue;
+          currentValue = '' + char;
+          pending = 1;
+        }
+      },
+      chooseOp: function(operation = 'multiply') {
+        if (pending) {
+          lastExecution.value = currentValue;
+          lastExecution.operation = currentOperation;
+          currentValue = '' + operations[currentOperation](lastValue, currentValue);
+          pending = 0;
+        }
+        isResult = 0;
+        currentOperation = operation;
+      },
+      equals: function() {
+        if (pending) {
+          lastExecution.value = currentValue;
+          lastExecution.operation = currentOperation;
+          currentValue = '' + operations[currentOperation](lastValue, currentValue);
+          pending = 0;
+        } else {
+          if (lastExecution.value === 'begin') [lastExecution.value, lastExecution.operation] = [currentValue, currentOperation];
+          else currentValue = '' + operations[lastExecution['operation']](currentValue, lastExecution['value']);
+        }
+          isResult = 1;
+      },
+      backspace: function() {
+        if (currentValue.length === 1) {
+          return currentValue = '0';
+          } else if (currentValue.length === 2 && currentValue.includes('-')) {
+            return currentValue = '0';
+          } else {
+            return currentValue = currentValue.replace(/\d$|\.$/, '');
+            }
+      },
+      clear: () => [currentValue, currentOperation, lastValue, pending, lastExecution, isResult] = beginningValues
+    }
+    
 
-  function equals() {
-    if ((input === null && !lastInput) || (((input === 0) || (input === 0)) && (currentOp === divide))) {
-      return display.textContent = 'Error';
-    } else if (input === null && lastInput) {
-      result = currentOp(result, lastInput);
-    } else {
-      result = currentOp(result, input);
-      lastInput = input;
-      input = null;
-    };
-    if ((result > 1e12) || (result < -1e12)) {
-      result < 0 ? display.textContent = 'Too small' : display.textContent = 'Too large'
-      return result = 0;
-    }
-    fork = 'result'
-    updateDisplay();
-    return result;
-  }
-  function updateDisplay() {
-    fork === 'result' ? number = result : number = input;
-    if (!Number.isInteger(number)) number = Math.round((number*100000))/100000;
-    display.textContent = number;
-  }
-  let float;
-  function writeDot() {
-    float = 1;
-  }
-  function write(nbr) {
-    function writeInto(target) {
-      if (target === null) target = 0;
-      if ((target > 1e10) || (target < -1e10)) return target < 0 ? display.textContent = 'Too small' : display.textContent = 'Too large';
-      return Number(target.toString() + nbr);
-    }
-    function writeAfterDot(target) {
-      return Number(target.toString() + '.' + nbr);
-    }
-    if (float) {
-      fork === 'result' ? result = writeAfterDot(result) : input = writeAfterDot(input);
-      float = 0;
-    } else fork === 'result' ? result = writeInto(result) : input = writeInto(input);
-    return updateDisplay();
-  }
-  function autoBackspace() {
-    backspace = number => number = Number(number.toString().slice(0, number.toString().length - 1));
-    fork === 'result' ? result = backspace(Number(result)) : input = backspace(Number(input));
-    updateDisplay();
-  }
-  function clear() {
-    fork = 'result';
-    result = 0;
-    input = null;
-    lastInput = input;
-    updateDisplay();
-  }
-  for (let i = 1; i < 10; i++) {
-  numbersContainer.children[i].addEventListener('click', () => {write(10 - i)})
-  }
 
-  numbersContainer.children[0].addEventListener('click', () => {write(0)});
-  document.getElementById('plus').addEventListener('click', () => {chooseOp(add)});
-  document.getElementById('minus').addEventListener('click', () => {chooseOp(subtract)});
-  document.getElementById('times').addEventListener('click', () => {chooseOp(multiply)});
-  document.getElementById('divide').addEventListener('click', () => {chooseOp(divide)});
-  document.getElementById('equals').addEventListener('click', () => {equals()});
-  document.getElementById('clear').addEventListener('click', () => {clear()});
-  document.getElementById('backspace').addEventListener('click', () => {autoBackspace()});
-    function test() {
-      write(5);
-      chooseOp(add);
-      write(2);
-      chooseOp(divide);
-      write(3);
-      chooseOp(add);
-      write(1);
-      equals();
-      equals();
-      equals();
-      chooseOp(multiply);
-      write(3);
-      equals();
-      return result;
+    const numberCharacterRegex = /\d|\./;
+
+//temporary
+    window.addEventListener('click', update);
+    window.setInterval(update, 500);
+
+    function addFn(callback, argument) {
+      let myNewButton = document.createElement('button');
+      document.body.appendChild(myNewButton);
+      myNewButton.textContent = argument || callback.name;
+      myNewButton.addEventListener('click', () => {
+        callback(argument);
+      })
     }
-    function test2() {
-      write(5);
-      write(1);
-      chooseOp(subtract);
-      write(4);
-      write(2);
-      autoBackspace();
-      write(0);
-      console.log(equals());
-      chooseOp(multiply);
-      write(1);
-      write(0);
-      autoBackspace();
-      write(0);
-      chooseOp(multiply);
-      write(2);
-      console.log(equals());
+    addFn(bf.write, '0')
+    for (let i = 1; i < 10; i++) {
+      addFn(bf.write, i, 1)  
     }
-    function test3(nbr) {
-      write(5);
-      chooseOp(add);
-      write(3);
-      autoBackspace();
-      write(1);
-      write(2);
-      write(1);
-      autoBackspace();
-      autoBackspace();
-      autoBackspace();
-      chooseOp(add)
-      write(1);
-      console.log(equals());
-    }
+    addFn(bf.write, '.');
+    addFn(bf.chooseOp, 'add');
+    addFn(bf.chooseOp, 'subtract');
+    addFn(bf.chooseOp, 'multiply');
+    addFn(bf.chooseOp, 'divide');
+    addFn(bf.backspace);
+    addFn(bf.equals);
+    addFn(bf.clear);
   </script>
-  </body>
+</body>
+
 </html>
