@@ -6,52 +6,149 @@
   <title>Calculator2</title>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
   <style>
-    body {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      -khtml-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
-      font-family: 'Roboto', sans-serif;
-      color: #321;
-    }
+  body {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    font-family: 'Roboto', sans-serif;
+    color: #321;
+  }
+  #container {
+    width: 400px;
+    margin: auto;
+    background-color: #efeae4;;
+    border: solid 3px #efeae4;
+    padding: 15px;
+    padding-top: 3px;
+    border-radius: 15px;
+    box-shadow: 0px 15px #667;
+  }
+  #subContainer {
+    border:solid 3px #efeae4;
+    box-shadow: 3px 3px #667;
+    border-radius: 5px;
+  }
+  #top {
+    border: solid 3px #efeae4;
+    border-radius: 3px;
+    border-top-right-radius: 10px;
+    border-right-color: #667;
+    border-bottom-color: #667;
+    box-shadow: 0px 5px #667;
+    margin: 5px auto;
+    border-top: solid 2px #fffaf4
+  }
+  #displayContainer {
+    background-color: #222;
+    position: relative;
+    height: 100px;
+    width: 350px;
+    margin: 5px auto 50px auto;
+    box-shadow: 2px 2px 0 #667;
+    border: solid 3px #efeae4;
+    border-radius: 8px;
+  }
+  #display {
+    color: #9df;
+    text-shadow: 0px 0px 3px;
+    position: absolute;
+    right: 10px;
+    font-size: xx-large;
+    margin: 30px 15px;
+  }
+  #functions {
+    margin: auto;
+    display: grid;
+    background-color: #222;
+    grid: 'nbr7 nbr8 nbr9 clear backspace' 75px
+          'nbr4 nbr5 nbr6 multiply divide' 75px
+          'nbr1 nbr2 nbr3 add subtract' 75px
+          'zero dot . . equals' 75px
+          / 75px 75px 75px 75px 75px;
+    border-radius: 15px;
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
+  }
+  button {
+    font-size: x-large;
+    border: none;
+    border-top: solid 3px;
+    border-right: solid 3px;
+    border-radius: 10px;
+    margin: 15px 10px;
+    font-family: inherit;
+    font-weight: 600;
+    color: inherit;
+  }
+  .numbers {
+    text-shadow: 0px 0px 1px;
+    background-color:#efeae4;
+    border-color: #667;
+  }
+  
+  .numbers:hover {
 
-    #display {
-      border: solid #246;
-      height: 75px;
-      width: 300px;
-      padding: 5px;
-      font-size: xx-large;
-    }
-    button {
-      font-size: x-large;
-    }
+  }
+  .numbers:active {
+    border: none;
+    border-left: solid 3px #222;
+    border-bottom: solid 3px #222;
+  }
+  .blackButtons, .redButtons {
+    color: #efeae4;
+    text-shadow: 0px 0px 1px;
+  }
+  .redButtons {
+    background-color: #e85;
+  }
+  .blackButtons {
+    background-color: #3f4949;
+  }
+  .blackButtons:active, .redButtons:active {
+    border:none;
+    border-left: solid 3px #222;
+    border-bottom: solid 3px #222;
+  }
+
   </style>
 </head>
 
 <body>
-  <div id='display'></div>
-  <!--
-  <button>0</button>
-  <button>1</button>
-  <button>2</button>
-  <button>3</button>
-  <button>4</button>
-  <button>.</button>
-  <button>+</button>
-  <button>-</button>
-  <button>*</button>
-  <button>/</button>
-  <button>Backspace</button>
-  -->
+  <div id='container'>
+    <div id='subContainer'>
+    <div id='top'>
+    <div id='displayContainer'>
+      <span id='display'></span>
+    </div>
+  </div>
+    <div id='functions'></div>
+  </div>
+  </div>
   <script>
-    const beginningValues = ['0', 'is', '0', 0, {operation:'multiply', value:'begin'}, 1];
-    let [currentValue, currentOperation, lastValue, pending, lastExecution, isResult] = beginningValues;
+    document.activeElement.blur()
+    const beginningValues = ['0', 'is', '0', 0, 1];
+    let [currentValue, currentOperation, lastValue, pending, isResult] = beginningValues;
+    let lastExecution = {value: 'begin', operation: 'is'}
     const display = document.getElementById('display');
     function update() {
+      while (/^0\d/.test(currentValue)) currentValue = currentValue.replace(0, '');
+      if (currentValue > 1e200) {
+        display.textContent = 'Too high';
+        return currentValue = '' + 1e200;
+      };
+      if (currentValue < -1e200) {
+        display.textContent = 'Too low';
+        return currentValue = '' + -1e200;
+      }
+      if (currentValue > 0 && currentValue < 1e-200) {
+        display.textContent = 'Too small';
+        return currentValue = '' + 1e-200;
+      }
+      if (currentValue.length > 10) return display.textContent = (+currentValue).toPrecision(10)
       display.textContent = currentValue;
-      console.log(lastValue)
     }
     const operations = {
       is: (a,b) => a,
@@ -66,14 +163,13 @@
         return a / b;
       }
     }
-    const bf = {
+    const mainFunctions = {
       write: function(char) {
         if (char === '.') {
-          if (currentValue.lastIndexOf('.') !== -1) return;
+          if (currentValue.lastIndexOf('.') !== -1 || /e/.test(currentValue) || currentValue > 1e15) return;
           if (!pending && !isResult) return;
           else if (currentValue === '0') return currentValue = '0.'
         }
-        if (currentValue === '0') return currentValue = '' + char;
         if (pending || isResult) {
           currentValue = currentValue + char
         } else {
@@ -82,7 +178,7 @@
           pending = 1;
         }
       },
-      chooseOp: function(operation = 'multiply') {
+      chooseOperator: function(operation = 'multiply') {
         if (pending) {
           lastExecution.value = currentValue;
           lastExecution.operation = currentOperation;
@@ -92,6 +188,8 @@
         isResult = 0;
         currentOperation = operation;
       },
+    }
+    const userFunctions = {
       equals: function() {
         if (pending) {
           lastExecution.value = currentValue;
@@ -109,41 +207,44 @@
           return currentValue = '0';
           } else if (currentValue.length === 2 && currentValue.includes('-')) {
             return currentValue = '0';
-          } else {
+          } else if (/e/.test(currentValue))return 
+          else {
             return currentValue = currentValue.replace(/\d$|\.$/, '');
             }
       },
-      clear: () => [currentValue, currentOperation, lastValue, pending, lastExecution, isResult] = beginningValues
+      clear: function() {
+        [currentValue, currentOperation, lastValue, pending, isResult] = beginningValues;
+        lastExecution.value = 'begin';
+        lastExecution.operation = 'is';
+        }
     }
     
-
-
-    const numberCharacterRegex = /\d|\./;
-
-//temporary
     window.addEventListener('click', update);
     window.setInterval(update, 500);
 
-    function addFn(callback, argument) {
-      let myNewButton = document.createElement('button');
-      document.body.appendChild(myNewButton);
-      myNewButton.textContent = argument || callback.name;
-      myNewButton.addEventListener('click', () => {
-        callback(argument);
-      })
-    }
-    addFn(bf.write, '0')
-    for (let i = 1; i < 10; i++) {
-      addFn(bf.write, i, 1)  
-    }
-    addFn(bf.write, '.');
-    addFn(bf.chooseOp, 'add');
-    addFn(bf.chooseOp, 'subtract');
-    addFn(bf.chooseOp, 'multiply');
-    addFn(bf.chooseOp, 'divide');
-    addFn(bf.backspace);
-    addFn(bf.equals);
-    addFn(bf.clear);
+  function addFn(group, callback, text, argument, id) {
+    let myNewButton = document.createElement('button');
+    document.getElementById('functions').appendChild(myNewButton);
+    myNewButton.classList.add(group)
+    myNewButton.textContent = text;
+    myNewButton.setAttribute('id', id || argument || callback.name);
+    myNewButton.style.gridArea = (id || argument || callback.name);
+    myNewButton.addEventListener('click', () => {
+      callback(argument);
+    })
+  }
+  addFn('numbers', mainFunctions.write, '0', '0', 'zero');
+  for (let i = 1; i < 10; i++) addFn('numbers', mainFunctions.write, i, i, 'nbr' + i);
+  addFn('numbers', mainFunctions.write, '.', '.', 'dot');
+  addFn('blackButtons', userFunctions.equals, '=');
+  addFn('redButtons', userFunctions.clear, 'C');
+  addFn('redButtons', userFunctions.backspace, '←');
+  addFn('blackButtons', mainFunctions.chooseOperator, '+', 'add');
+  addFn('blackButtons', mainFunctions.chooseOperator, '-', 'subtract');
+  addFn('blackButtons', mainFunctions.chooseOperator, 'x', 'multiply');
+  addFn('blackButtons', mainFunctions.chooseOperator, ':', 'divide');
+  
+  const numberCharacterRegex = /\d|\./;
   </script>
 </body>
 
