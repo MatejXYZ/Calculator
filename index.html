@@ -4,8 +4,7 @@
 <head>
   <meta charset="utf-8">
   <title>Calculator2</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400&display=swap" rel="stylesheet">
-  <style>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300&display=swap" rel="stylesheet">   <style>
   body {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -13,23 +12,31 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Kanit', sans-serif;
     color: #321;
   }
   #container {
     width: 400px;
-    margin: auto;
+    margin: 150px auto;
     background-color: #efeae4;;
-    border: solid 3px #efeae4;
+    border: solid 2px #667;
+    border-top: none;
+    border-bottom: none;
     padding: 15px;
-    padding-top: 3px;
+    padding-top: 0;
     border-radius: 15px;
-    box-shadow: 0px 15px #667;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+    box-shadow: 0 15px #3f4949;
   }
   #subContainer {
-    border:solid 3px #efeae4;
+    position: relative;
+    top: -5px;
+    border: solid 3px #efeae4;
     box-shadow: 3px 3px #667;
-    border-radius: 5px;
+    border-radius: 15px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
   }
   #top {
     border: solid 3px #efeae4;
@@ -53,10 +60,10 @@
   }
   #display {
     color: #9df;
-    text-shadow: 0px 0px 3px;
+    text-shadow: 0px 0px 2px;
     position: absolute;
     right: 10px;
-    font-size: xx-large;
+    font-size: 40px;
     margin: 30px 15px;
   }
   #functions {
@@ -75,44 +82,52 @@
   button {
     font-size: x-large;
     border: none;
-    border-top: solid 3px;
-    border-right: solid 3px;
+    border-bottom: solid 2px;
+    border-right: solid 2px;
     border-radius: 10px;
     margin: 15px 10px;
     font-family: inherit;
     font-weight: 600;
     color: inherit;
+    padding-bottom: 2px;
+    padding-left: 2px;
   }
   .numbers {
     text-shadow: 0px 0px 1px;
     background-color:#efeae4;
     border-color: #667;
   }
-  
   .numbers:hover {
-
+    background: linear-gradient(45deg, #dfdad4 30%, white);
   }
   .numbers:active {
     border: none;
     border-left: solid 3px #222;
-    border-bottom: solid 3px #222;
+    border-top: solid 3px #222;
   }
   .blackButtons, .redButtons {
     color: #efeae4;
-    text-shadow: 0px 0px 1px;
-  }
-  .redButtons {
-    background-color: #e85;
+    text-shadow: 0 0 1px;
   }
   .blackButtons {
     background-color: #3f4949;
+    border-color: #321;
+  }
+  .blackButtons:hover {
+    background: linear-gradient(45deg, #373f3f, #4f5959);
+  }
+  .redButtons {
+    background-color: #e85;
+    border-color: #123;
+  }
+  .redButtons:hover {
+    background: linear-gradient(45deg, #e08050 30%, #ff9060);
   }
   .blackButtons:active, .redButtons:active {
-    border:none;
+    border: none;
     border-left: solid 3px #222;
-    border-bottom: solid 3px #222;
+    border-top: solid 3px #222;
   }
-
   </style>
 </head>
 
@@ -143,11 +158,15 @@
         display.textContent = 'Too low';
         return currentValue = '' + -1e200;
       }
-      if (currentValue > 0 && currentValue < 1e-200) {
+      if (currentValue > 0 && currentValue < 1e-8) {
         display.textContent = 'Too small';
         return currentValue = '' + 1e-200;
       }
-      if (currentValue.length > 10) return display.textContent = (+currentValue).toPrecision(10)
+      if (currentValue.length > 8) {
+        prec = (+currentValue).toPrecision(8);
+        fix = (+currentValue).toFixed(8);
+        return prec.length >= fix.length ? display.textContent = fix : display.textContent = prec;
+      }
       display.textContent = currentValue;
     }
     const operations = {
@@ -244,7 +263,22 @@
   addFn('blackButtons', mainFunctions.chooseOperator, 'x', 'multiply');
   addFn('blackButtons', mainFunctions.chooseOperator, ':', 'divide');
   
-  const numberCharacterRegex = /\d|\./;
+  window.addEventListener('keydown', event => {
+    key = event.key;
+    if (/^\d$|\./.test(key)) mainFunctions.write(key);
+    else {
+      listen(['=', 'Enter'], userFunctions.equals);
+      listen(['*','x','X'], mainFunctions.chooseOperator, 'multiply');
+      listen([':','/'], mainFunctions.chooseOperator, 'divide');
+      listen('+', mainFunctions.chooseOperator, 'add');
+      listen('-', mainFunctions.chooseOperator, 'subtract');
+      listen(['Backspace','Delete'], userFunctions.backspace);
+      listen(['c','C','Escape'], userFunctions.clear);
+    }
+  })
+  function listen(myKeys, myFn, argument) {
+    if (myKeys.includes(key)) myFn(argument);
+  }
   </script>
 </body>
 
