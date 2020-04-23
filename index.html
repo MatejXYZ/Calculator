@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>Calculator2</title>
+  <title>Calculator</title>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300&display=swap" rel="stylesheet">   <style>
   body {
     -webkit-touch-callout: none;
@@ -16,14 +16,14 @@
     color: #321;
   }
   #container {
-    width: 400px;
     margin: 150px auto;
+    width: 388px;
     background-color: #efeae4;;
+    padding-bottom: 15px;
+    padding-inline: 10px;
     border: solid 2px #667;
     border-top: none;
     border-bottom: none;
-    padding: 15px;
-    padding-top: 0;
     border-radius: 15px;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
@@ -31,7 +31,7 @@
   }
   #subContainer {
     position: relative;
-    top: -5px;
+    height: 480px;
     border: solid 3px #efeae4;
     box-shadow: 3px 3px #667;
     border-radius: 15px;
@@ -39,14 +39,18 @@
     border-top-right-radius: 5px;
   }
   #top {
-    border: solid 3px #efeae4;
+    position: absolute;
+    bottom: 305px;
+    width: 380px;
+    height: 180px;
+    border: solid 3px #667;
+    border-left: none;
+    background-color: #efeae4;
     border-radius: 3px;
-    border-top-right-radius: 10px;
-    border-right-color: #667;
-    border-bottom-color: #667;
+    border-top-right-radius: 7px;
+    border-top-left-radius: 7px;
+    border-top: none;
     box-shadow: 0px 5px #667;
-    margin: 5px auto;
-    border-top: solid 2px #fffaf4
   }
   #displayContainer {
     background-color: #222;
@@ -56,6 +60,7 @@
     margin: 5px auto 50px auto;
     box-shadow: 2px 2px 0 #667;
     border: solid 3px #efeae4;
+    border-top: solid 3px #fffaf4;
     border-radius: 8px;
   }
   #display {
@@ -67,7 +72,9 @@
     margin: 30px 15px;
   }
   #functions {
-    margin: auto;
+    position: absolute;
+    width: 380px;
+    bottom: 0;
     display: grid;
     background-color: #222;
     grid: 'nbr7 nbr8 nbr9 clear backspace' 75px
@@ -124,6 +131,11 @@
     background: linear-gradient(45deg, #e08050 30%, #ff9060);
   }
   .blackButtons:active, .redButtons:active {
+    border: none;
+    border-left: solid 3px #222;
+    border-top: solid 3px #222;
+  }
+  .effect {
     border: none;
     border-left: solid 3px #222;
     border-top: solid 3px #222;
@@ -276,8 +288,16 @@
       listen(['c','C','Escape'], userFunctions.clear);
     }
   })
-  function listen(myKeys, myFn, argument) {
-    if (myKeys.includes(key)) myFn(argument);
+  function listen(myKeys, myFn, argument, effect) {
+    if (myKeys.includes(key)) {
+      myFn(argument);
+      if (argument) {
+        let currentButton = document.getElementById(argument);
+        currentButton.classList.toggle('effect');
+        setTimeout(() => currentButton.classList.toggle('effect'), 250);
+      }
+      return;
+    }
   }
   </script>
 </body>
